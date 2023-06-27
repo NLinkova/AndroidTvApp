@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 
 import { NavigationContainer } from '@react-navigation/native';
+import GameScreen from './screens/TV/GameScreen';
 import TVScreen from './screens/TV/TVScreen';
 import { GameCard } from './types';
 
@@ -18,7 +19,7 @@ function App(): JSX.Element {
     <NavigationContainer>
       <Stack.Navigator initialRouteName='TVScreen' screenOptions={{
         headerStyle: {
-          backgroundColor: '#1e45f4',
+          backgroundColor: '#3806B2',
         },
         headerTitleAlign: 'center',
         headerTintColor: '#fff',
@@ -33,11 +34,11 @@ function App(): JSX.Element {
           options={{ title: "Игры" }}
 
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="GameScreen"
-          component={GameComponent}
+          component={GameScreen}
           options={({ route }) => ({ title: route.params.game.name })}
-        /> */}
+        />
       </Stack.Navigator>
     </NavigationContainer>
 

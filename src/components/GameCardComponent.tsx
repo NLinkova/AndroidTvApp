@@ -7,7 +7,10 @@ interface GameCardProps {
   onPress: (item: GameCard) => void;
   hasTVPreferredFocus?: boolean;
   focus?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
+
 
 const { width } = Dimensions.get('window');
 const cardWidth = width / 5;
