@@ -1,18 +1,18 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, MD2Colors, Text } from 'react-native-paper';
-
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { Text } from 'react-native-paper';
 import GameCardComponent from '../../components/GameCardComponent';
 import { RAWG_API_KEY, URL_RAWG } from '../../constants/constants';
 import { GameCard } from '../../types';
 
 const TVScreen = () => {
   const [data, setData] = useState<GameCard[]>([]);
-  const [selectedItem, setSelectedItem] = useState<GameCard>();
-  const [focus, setFocus] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<GameCard | undefined>(undefined);
+  const [focusedItem, setFocusedItem] = useState<GameCard | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -25,33 +25,35 @@ const TVScreen = () => {
           },
         });
         setData(response.data.results);
+        setLoading(false);
       } catch (error) {
         console.log('Error fetching games:', error);
+        setLoading(false);
       }
     };
     fetchGames();
   }, []);
 
-
   const handleBlurItem = () => {
-    setSelectedItem(undefined);
-    setFocus(false);
+    setFocusedItem(undefined);
+  };
+
+  const handleFocusItem = (item: GameCard) => {
+    setFocusedItem(item);
   };
 
   const handleSelectItem = (item: GameCard) => {
+    setSelectedItem(item);
     navigation.navigate('GameScreen', { game: item });
   };
 
   const renderItem = ({ item }: { item: GameCard }) => {
-    if (!item) {
-      return null;
-    }
     return (
       <GameCardComponent
         item={item}
         onPress={handleSelectItem}
-        focus={focus}
-        onFocus={() => setSelectedItem(item)}
+        focus={selectedItem === item} // Pass the focus prop here
+        onFocus={() => handleFocusItem(item)}
         onBlur={handleBlurItem}
       />
     );
@@ -63,7 +65,9 @@ const TVScreen = () => {
       style={styles.gradientContainer}
     >
       <View style={styles.mainContainer}>
-        {data ? (
+        {loading ? (
+          <ActivityIndicator animating={true} color="#FFF" />
+        ) : data.length > 0 ? (
           <>
             <ScrollView
               horizontal={true}
@@ -75,18 +79,17 @@ const TVScreen = () => {
                 </View>
               ))}
             </ScrollView>
-            {selectedItem && (
+            {focusedItem ? (
               <View style={styles.descriptionContainer}>
-                <Text style={styles.descriptionText}>Описание:</Text>
-                <Text style={styles.descriptionText}>{selectedItem.name}</Text>
-                <Text style={styles.descriptionText}>Rating: {selectedItem.rating}</Text>
+                <Text style={styles.descriptionTitle}>Описание:</Text>
+                <Text style={styles.descriptionText}>Название: {focusedItem.name}</Text>
+                <Text style={styles.descriptionText}>Rating: {focusedItem.rating}</Text>
               </View>
-            )}
+            ) : null}
           </>
         ) : (
-          <ActivityIndicator animating={true} color={MD2Colors.red800} />
+          <Text style={styles.noDataText}>Нет данных</Text>
         )}
-        {data.length === 0 && <Text>Нет данных</Text>}
       </View>
     </LinearGradient>
   );
@@ -110,11 +113,23 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     marginTop: 20,
-    alignItems: 'center',
+    alignItems: 'flex-start',
+  },
+  descriptionTitle: {
+    color: '#FFF',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   descriptionText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  noDataText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginTop: 20,
   },
 });

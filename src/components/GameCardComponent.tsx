@@ -5,7 +5,6 @@ import { GameCard } from '../types';
 interface GameCardProps {
   item: GameCard;
   onPress: (item: GameCard) => void;
-  hasTVPreferredFocus?: boolean;
   focus?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -16,25 +15,25 @@ const { width } = Dimensions.get('window');
 const cardWidth = width / 5;
 const cardHeight = cardWidth * 1.3;
 
-const GameCardComponent: React.FC<GameCardProps> = ({ item, onPress }) => {
+const GameCardComponent: React.FC<GameCardProps> = ({ item, onPress, onFocus, onBlur }) => {
   const [focus, setFocus] = useState(false);
 
-  const title = item.name
-
-  const onFocus = useCallback(() => {
+  const handleFocus = useCallback(() => {
+    onFocus?.();
     setFocus(true);
-  }, [title]);
+  }, [onFocus]);
 
-
-  const onBlur = useCallback(() => {
+  const handleBlur = useCallback(() => {
+    onBlur?.();
     setFocus(false);
-  }, []);
+  }, [onBlur]);
+
   const imageSource: ImageSourcePropType = { uri: item.background_image };
 
   return (
     <TouchableHighlight
-      onFocus={onFocus}
-      onBlur={onBlur}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       style={[
         styles.gameCardContainer,
         focus ? styles.gameCardContainerFocused : null,
