@@ -1,5 +1,4 @@
 import axios from 'axios';
-
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, MD2Colors, Text } from 'react-native-paper';
@@ -8,14 +7,10 @@ import GameCardComponent from '../../components/GameCardComponent';
 import { URL_RAWG } from '../../constants/constants';
 import { GameCard } from '../../types';
 
-
-
 const TVScreen = () => {
-
   const [data, setData] = useState<GameCard[]>([]);
-
   const [selectedItem, setSelectedItem] = useState<GameCard>();
-  const [page, setPage] = useState(1);
+  const [hasTVPreferredFocus, setHasTVPreferredFocus] = useState(true);
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -23,7 +18,7 @@ const TVScreen = () => {
         const response = await axios.get(URL_RAWG, {
           params: {
             key: "e04a3e18da124dcf84f91a742beb29a6",
-            page: page,
+            page: 1,
           },
         });
         setData(response.data.results);
@@ -31,31 +26,25 @@ const TVScreen = () => {
         console.log('Error fetching games:', error);
       }
     };
-
     fetchGames();
-  }, [page]);
+  }, []); // Fetch games whenever the page changes
 
-
-
-
-  // Функция для обработки выбора элемента списка
+  // Function to handle selecting an item from the list
   const handleSelectItem = (item: GameCard) => {
+    setHasTVPreferredFocus(true)
     setSelectedItem(item);
   };
 
-
-  // Отрисовка элемента списка
+  // Render an item from the list
   const renderItem = ({ item }: { item: GameCard }) => {
     if (!item) {
       return null;
     }
-    return (
-      <GameCardComponent item={item} onPress={handleSelectItem} />
-    )
-  }
+    return <GameCardComponent item={item} onPress={handleSelectItem} />;
+  };
 
   return (
-    <View>
+    <View style={styles.mainContainer}>
       {data ? (
         <>
           <ScrollView
@@ -68,68 +57,33 @@ const TVScreen = () => {
               </View>
             ))}
           </ScrollView>
-          <View style={styles.pageNavigation}>
-            <Text style={styles.pageText}>Page: {page}</Text>
-            <View style={styles.horizontalLine} />
-            {page >= 2 && <Text
-              style={styles.pageButton}
-              onPress={() => setPage(page - 1)}
-            >
-              Previous Page
-            </Text>}
-            <Text
-              style={styles.pageButton}
-              onPress={() => setPage(page + 1)}
-            >
-              Next Page
-            </Text>
-          </View>
-        </>) : (
-        <ActivityIndicator animating={true} color={MD2Colors.red800} />
-      )
-      }
-      {data.length === 0 && (
-        <Text>Нет данных</Text>
-      )}
 
-      {selectedItem && (
+        </>
+      ) : (
+        <ActivityIndicator animating={true} color={MD2Colors.red800} />
+      )}
+      {data.length === 0 && <Text>Нет данных</Text>}
+      {selectedItem && hasTVPreferredFocus && (
         <View>
-          <Text>Подробная информация:</Text>
+          <Text>Описание:</Text>
           <Text>{selectedItem.name}</Text>
+          <Text >Rating: {selectedItem.rating}</Text>
         </View>
       )}
     </View>
   );
-
-
 };
 
 export default TVScreen;
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    backgroundColor: "transparent",
+  },
   scrollViewContainer: {
     paddingHorizontal: 16,
   },
   itemWrapper: {
     marginRight: 16,
-  },
-  pageNavigation: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 16,
-    paddingHorizontal: 16,
-  },
-  pageText: {
-    marginRight: 8,
-  },
-  horizontalLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'black',
-    marginHorizontal: 8,
-  },
-  pageButton: {
-    color: 'blue',
-    textDecorationLine: 'underline',
   },
 });

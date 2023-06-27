@@ -1,36 +1,53 @@
-import * as React from 'react';
-import { Dimensions, Image, ImageSourcePropType, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Dimensions, Image, ImageSourcePropType, StyleSheet, Text, TouchableHighlight, View } from 'react-native';
 import { GameCard } from '../types';
 
 interface GameCardProps {
   item: GameCard;
   onPress: (item: GameCard) => void;
+  hasTVPreferredFocus?: boolean;
+  focus?: boolean;
 }
 
 const { width } = Dimensions.get('window');
 const cardWidth = width / 5;
+const cardHeight = cardWidth * 1.3;
 
 const GameCardComponent: React.FC<GameCardProps> = ({ item, onPress }) => {
+  const [focus, setFocus] = useState(false);
+
+  const title = item.name
+
+  const onFocus = useCallback(() => {
+    setFocus(true);
+  }, [title]);
+
+
+  const onBlur = useCallback(() => {
+    setFocus(false);
+  }, []);
   const imageSource: ImageSourcePropType = { uri: item.background_image };
 
   return (
-    <TouchableOpacity onPress={() => onPress(item)} style={styles.gameCardContainer}>
-      <View style={styles.cardContent}>
-        <Image style={styles.gameImage} source={imageSource} />
-        <View style={styles.cardDetails}>
-          <Text style={styles.cardTitle}>{item.name}</Text>
-          <Text style={styles.cardRating}>Rating: {item.rating}</Text>
+    <TouchableHighlight
+      onFocus={onFocus}
+      onBlur={onBlur}
+      style={[
+        styles.gameCardContainer,
+        focus ? styles.gameCardContainerFocused : null,
+      ]}
+      underlayColor="#d2ccf3"
+      onPress={() => onPress(item)}
+    >
+      <View>
+        <View style={styles.cardContent}>
+          <Image style={styles.gameImage} source={imageSource} />
+          <View style={styles.cardDetails}>
+            <Text style={styles.cardTitle}>{item.name}</Text>
+          </View>
         </View>
       </View>
-      <View style={styles.buttonContainer}>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Cancel</Text>
-        </Pressable>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>OK</Text>
-        </Pressable>
-      </View>
-    </TouchableOpacity>
+    </TouchableHighlight>
   );
 };
 
@@ -38,19 +55,29 @@ export default GameCardComponent;
 
 const styles = StyleSheet.create({
   gameCardContainer: {
+    backgroundColor: '#d2ccf3',
     width: cardWidth,
+    height: cardHeight,
     alignItems: 'center',
+    borderColor: 'transparent',
+    borderWidth: 5,
+    borderRadius: 15,
+    marginHorizontal: 10,
     marginBottom: 16,
+    overflow: 'hidden',
+  },
+  gameCardContainerFocused: {
+    borderColor: 'rgb(179, 36, 131)',
   },
   cardContent: {
-    borderWidth: 1,
-    borderRadius: 8,
     overflow: 'hidden',
     marginBottom: 8,
   },
   gameImage: {
     width: cardWidth,
     height: cardWidth,
+    borderRadius: 15,
+    borderWidth: 0
   },
   cardDetails: {
     padding: 8,
@@ -63,19 +90,5 @@ const styles = StyleSheet.create({
   cardRating: {
     fontSize: 10,
     color: 'gray',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-  },
-  button: {
-    backgroundColor: 'lightgray',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-  buttonText: {
-    fontSize: 10,
-    fontWeight: 'bold',
   },
 });
