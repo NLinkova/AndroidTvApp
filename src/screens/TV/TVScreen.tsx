@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Image, ImageSourcePropType, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ActivityIndicator, MD2Colors, Text } from 'react-native-paper';
 
-
 import { URL_RAWG } from '../../constants/constants';
 import { GameCard } from '../../types';
 
@@ -18,30 +17,23 @@ const TVScreen = () => {
   const [selectedItem, setSelectedItem] = useState<GameCard>();
 
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchGames = async () => {
       try {
-        const response = await axios.get<GameCard[]>(URL_RAWG);
-        setData(response.data);
+        const response = await axios.get(URL_RAWG, {
+          params: {
+            key: RAWG_API_KEY,
+          },
+        });
+        setData(response.data.results);
       } catch (error) {
-        console.log('Error fetching movies:', error);
+        console.log('Error fetching games:', error);
       }
     };
 
-    fetchMovies();
+    fetchGames();
   }, []);
 
-  const fetchGames = async () => {
-    try {
-      const response = await axios.get(URL_RAWG, {
-        params: {
-          key: process.env.RAWG_API_KEY,
-        },
-      });
-      setData(response.data.results);
-    } catch (error) {
-      console.log('Error fetching games:', error);
-    }
-  };
+
 
 
   // Функция для обработки выбора элемента списка
@@ -55,14 +47,14 @@ const TVScreen = () => {
     if (!item) {
       return null;
     }
-    const imageSource: ImageSourcePropType = { uri: `https://api.nomoreparties.co/${item.image?.url}` };
+    const imageSource: ImageSourcePropType = { uri: item.background_image };
 
     return (
 
       <TouchableOpacity onPress={() => handleSelectItem(item)}>
         <View>
           <Image source={imageSource} />
-          <Text>{item.nameRU}</Text>
+          <Text>{item.name}</Text>
           <Text>{item.description}</Text>
         </View>
       </TouchableOpacity>
@@ -89,8 +81,7 @@ const TVScreen = () => {
       {selectedItem && (
         <View>
           <Text>Подробная информация:</Text>
-          <Text>{selectedItem.nameRU}</Text>
-          {/* Добавьте другие данные элемента */}
+          <Text>{selectedItem.name}</Text>
         </View>
       )}
     </View>
