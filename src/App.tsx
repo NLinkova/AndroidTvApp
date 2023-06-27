@@ -1,32 +1,48 @@
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import {
-  SafeAreaView, StyleSheet
-} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 
+import { NavigationContainer } from '@react-navigation/native';
 import TVScreen from './screens/TV/TVScreen';
+import { GameCard } from './types';
+
+const Stack = createNativeStackNavigator();
+export type StackParams = {
+  TVScreen: undefined;
+  GameScreen: { game: GameCard };
+};
 
 function App(): JSX.Element {
 
   return (
-    <LinearGradient
-      colors={['#14063D', '#3806B2']}
-      style={styles.gradientContainer}
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <TVScreen />
-      </SafeAreaView>
-    </LinearGradient>
+
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName='TVScreen' screenOptions={{
+        headerStyle: {
+          backgroundColor: '#1e45f4',
+        },
+        headerTitleAlign: 'center',
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }} >
+
+        <Stack.Screen
+          name="TVScreen"
+          component={TVScreen}
+          options={{ title: "Игры" }}
+
+        />
+        {/* <Stack.Screen
+          name="GameScreen"
+          component={GameComponent}
+          options={({ route }) => ({ title: route.params.game.name })}
+        /> */}
+      </Stack.Navigator>
+    </NavigationContainer>
+
   );
 }
 
 
 export default App;
-const styles = StyleSheet.create({
-  gradientContainer: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-});
