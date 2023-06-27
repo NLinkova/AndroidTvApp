@@ -7,4 +7,5 @@ export interface GameCard {
   name: string;
   background_image?: string;
   description: string;
+  rating: string
 }

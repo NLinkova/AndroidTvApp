@@ -1,12 +1,12 @@
 import axios from 'axios';
 
 import { useEffect, useState } from 'react';
-import { Image, ImageSourcePropType, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, MD2Colors, Text } from 'react-native-paper';
 
+import GameCardComponent from '../../components/GameCardComponent';
 import { URL_RAWG } from '../../constants/constants';
 import { GameCard } from '../../types';
-
 
 
 
@@ -15,13 +15,15 @@ const TVScreen = () => {
   const [data, setData] = useState<GameCard[]>([]);
 
   const [selectedItem, setSelectedItem] = useState<GameCard>();
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const fetchGames = async () => {
       try {
         const response = await axios.get(URL_RAWG, {
           params: {
-            key: RAWG_API_KEY,
+            key: "e04a3e18da124dcf84f91a742beb29a6",
+            page: page,
           },
         });
         setData(response.data.results);
@@ -31,7 +33,7 @@ const TVScreen = () => {
     };
 
     fetchGames();
-  }, []);
+  }, [page]);
 
 
 
@@ -47,30 +49,42 @@ const TVScreen = () => {
     if (!item) {
       return null;
     }
-    const imageSource: ImageSourcePropType = { uri: item.background_image };
-
     return (
-
-      <TouchableOpacity onPress={() => handleSelectItem(item)}>
-        <View>
-          <Image source={imageSource} />
-          <Text>{item.name}</Text>
-          <Text>{item.description}</Text>
-        </View>
-      </TouchableOpacity>
+      <GameCardComponent item={item} onPress={handleSelectItem} />
     )
   }
 
   return (
     <View>
       {data ? (
-        <ScrollView horizontal={true} contentContainerStyle={styles.scrollViewContainer}>
-          {data.map((item) => (
-            <View key={item.id} style={styles.itemWrapper}>
-              {renderItem({ item })}
-            </View>
-          ))}
-        </ScrollView>) : (
+        <>
+          <ScrollView
+            horizontal={true}
+            contentContainerStyle={styles.scrollViewContainer}
+          >
+            {data.map((item) => (
+              <View key={item.id} style={styles.itemWrapper}>
+                {renderItem({ item })}
+              </View>
+            ))}
+          </ScrollView>
+          <View style={styles.pageNavigation}>
+            <Text style={styles.pageText}>Page: {page}</Text>
+            <View style={styles.horizontalLine} />
+            {page >= 2 && <Text
+              style={styles.pageButton}
+              onPress={() => setPage(page - 1)}
+            >
+              Previous Page
+            </Text>}
+            <Text
+              style={styles.pageButton}
+              onPress={() => setPage(page + 1)}
+            >
+              Next Page
+            </Text>
+          </View>
+        </>) : (
         <ActivityIndicator animating={true} color={MD2Colors.red800} />
       )
       }
@@ -99,12 +113,23 @@ const styles = StyleSheet.create({
   itemWrapper: {
     marginRight: 16,
   },
-  itemContainer: {
-    marginBottom: 8,
+  pageNavigation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+    paddingHorizontal: 16,
   },
-  itemImage: {
-    width: 150,
-    height: 200,
-    resizeMode: 'cover',
+  pageText: {
+    marginRight: 8,
+  },
+  horizontalLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'black',
+    marginHorizontal: 8,
+  },
+  pageButton: {
+    color: 'blue',
+    textDecorationLine: 'underline',
   },
 });
